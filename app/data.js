@@ -65,7 +65,7 @@ const posts = [
         id: '3ac6d263-6c61-4606-b8c3-d9c5330fbf11',
         user_id: '045a48db-db0a-42d1-9ccb-b0fbe660325e',
         image_url: '/post_pics/Bird.jpg',
-        created_at: '2024-05045a48db-db0a-42d1-9ccb-b0fbe660325ef66-ae2f-71fdc791ceb8',
+        created_at: '2024-05-01 15:00:00',
     },
     {
         id: 'ded98b8f-2376-4f5f-829b-8a4557ed969c',
@@ -163,7 +163,7 @@ async function seedFollow(client) {
         CREATE TABLE IF NOT EXISTS follows (
             followee_id UUID NOT NULL,
             follower_id UUID NOT NULL,
-            followed_at TIMESTAMP DEFUALT CURRENT_TIMESTAMP,
+            followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (followee_id, follower_id)
         );`;
 
@@ -171,7 +171,7 @@ async function seedFollow(client) {
 
         const insertedFollows = await Promise.all(
             follows.map(async (follow) => client.sql`
-            INSERT INTO follows (followee_id, follwer_id, followed_at)
+            INSERT INTO follows (followee_id, follower_id, followed_at)
             VALUES (${follow.followee_id}, ${follow.follower_id}, ${follow.followed_at})`),
         );
 
@@ -186,3 +186,24 @@ async function seedFollow(client) {
         throw error;
     }
 }
+
+async function main() {
+    const client = await db.connect();
+    
+    await client.sql`DROP TABLE posts;`;
+    await client.sql`DROP TABLE users;`;
+
+    await seedUsers(client);
+    await seedPosts(client);
+    await seedFollow(client);
+
+    await client.end();
+
+}
+
+main().catch((err) => {
+    console.error(
+        'An error occurred while attempting to seed the database:',
+        err,
+    );
+});
